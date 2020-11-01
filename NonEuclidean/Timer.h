@@ -1,37 +1,21 @@
 #pragma once
-#include <Windows.h>
 
-class Timer {
+#include <chrono>
+
+class Timer
+{
 public:
-  Timer() {
-    QueryPerformanceFrequency(&frequency);
-  }
+    Timer() { Start(); }
 
-  void Start() {
-    QueryPerformanceCounter(&t1);
-  }
+    void Start() { t1 = std::chrono::system_clock::now(); }
 
-  float Stop() {
-    QueryPerformanceCounter(&t2);
-    return float(t2.QuadPart - t1.QuadPart) / frequency.QuadPart;
-  }
-
-  int64_t GetTicks() {
-    QueryPerformanceCounter(&t2);
-    return t2.QuadPart;
-  }
-
-  int64_t SecondsToTicks(float s) {
-    return int64_t(float(frequency.QuadPart) * s);
-  }
-
-  float StopStart() {
-    const float result = Stop();
-    t1 = t2;
-    return result;
-  }
+    double GetSeconds()
+    {
+        auto now = std::chrono::system_clock::now();
+        auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(now - t1);
+        return static_cast<double>(elapsed.count()) / 1000000.0;
+    }
 
 private:
-  LARGE_INTEGER frequency;        // ticks per second
-  LARGE_INTEGER t1, t2;           // ticks
+    std::chrono::time_point<std::chrono::system_clock> t1;
 };

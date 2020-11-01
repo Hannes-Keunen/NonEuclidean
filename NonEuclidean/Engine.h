@@ -1,61 +1,63 @@
 #pragma once
-#include "GameHeader.h"
+
+#include <glad/glad.h>
+
 #include "Camera.h"
+#include "GameHeader.h"
 #include "Input.h"
 #include "Object.h"
-#include "Portal.h"
 #include "Player.h"
-#include "Timer.h"
+#include "Portal.h"
+#include "RoomGraph.h"
 #include "Scene.h"
 #include "Sky.h"
-#include <GL/glew.h>
-#include <windows.h>
+#include "Timer.h"
+
+#include <GLFW/glfw3.h>
+
 #include <memory>
 #include <vector>
 
-class Engine {
+class Engine
+{
+    friend class Input;
+
 public:
-  Engine();
-  ~Engine();
+    Engine();
+    ~Engine();
 
-  int Run();
-  void Update();
-  void Render(const Camera& cam, GLuint curFBO, const Portal* skipPortal);
-  void LoadScene(int ix);
+    int  Run();
+    void Update();
+    void Render(const Camera& cam, GLuint curFBO, const Portal* skipPortal);
+    void LoadScene(int ix);
 
-  LRESULT WindowProc(HWND hCurWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-  const Player& GetPlayer() const { return *player; }
-  float NearestPortalDist() const;
+    const Player& GetPlayer() const { return *player; }
+    float         NearestPortalDist() const;
 
 private:
-  void CreateGLWindow();
-  void InitGLObjects();
-  void DestroyGLObjects();
-  void SetupInputs();
-  void ConfineCursor();
-  void ToggleFullscreen();
+    void CreateGLWindow();
+    void InitGLObjects();
+    void DestroyGLObjects();
+    void ToggleFullscreen();
 
-  HDC   hDC;           // device context
-  HGLRC hRC;				   // opengl context
-  HWND  hWnd;				   // window
-  HINSTANCE hInstance; // process id
+    GLFWwindow* window;
 
-  LONG iWidth;         // window width
-  LONG iHeight;        // window height
-  bool isFullscreen;   // fullscreen state
+    int  iWidth;       // window width
+    int  iHeight;      // window height
+    bool isFullscreen; // fullscreen state
 
-  Camera main_cam;
-  Input input;
-  Timer timer;
+    Camera main_cam;
+    Input  input;
+    Timer  timer;
 
-  std::vector<std::shared_ptr<Object>> vObjects;
-  std::vector<std::shared_ptr<Portal>> vPortals;
-  std::shared_ptr<Sky> sky;
-  std::shared_ptr<Player> player;
+    std::vector<std::shared_ptr<Object>> vObjects;
+    std::vector<std::shared_ptr<Portal>> vPortals;
+    std::shared_ptr<Sky>                 sky;
+    std::shared_ptr<Player>              player;
 
-  GLint occlusionCullingSupported;
+    GLint occlusionCullingSupported;
 
-  std::vector<std::shared_ptr<Scene>> vScenes;
-  std::shared_ptr<Scene> curScene;
+    // std::vector<std::shared_ptr<Scene>> vScenes;
+    std::vector<RoomGraph> vEnvs;
+    // std::shared_ptr<Scene>              curScene;
 };

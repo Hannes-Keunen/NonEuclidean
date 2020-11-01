@@ -1,46 +1,59 @@
 #include "Input.h"
+
 #include "GameHeader.h"
-#include <Windows.h>
+
+#include <cstring>
 #include <memory>
 
-Input::Input() {
-  memset(this, 0, sizeof(Input));
+void Input::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    auto input = static_cast<Input*>(glfwGetWindowUserPointer(window));
+    input->key_press[key] = (action == GLFW_PRESS ? true : false);
+    input->key[key] = (action == GLFW_RELEASE ? false : true);
 }
 
-void Input::EndFrame() {
-  memset(key_press, 0, sizeof(key_press));
-  memset(mouse_button_press, 0, sizeof(mouse_button_press));
-  mouse_dx = mouse_dx * GH_MOUSE_SMOOTH + mouse_ddx * (1.0f - GH_MOUSE_SMOOTH);
-  mouse_dy = mouse_dy * GH_MOUSE_SMOOTH + mouse_ddy * (1.0f - GH_MOUSE_SMOOTH);
-  mouse_ddx = 0.0f;
-  mouse_ddy = 0.0f;
+void Input::ButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+    auto input = static_cast<Input*>(glfwGetWindowUserPointer(window));
+    input->mouse_button_press[button] = (action == GLFW_PRESS ? true : false);
+    input->mouse_button[button] = (action == GLFW_RELEASE ? false : true);
 }
 
-void Input::UpdateRaw(const tagRAWINPUT* raw) {
-  static BYTE buffer[2048];
-  static UINT buffer_size = sizeof(buffer);
+void Input::CursorCallback(GLFWwindow* window, double x, double y)
+{
+    auto input = static_cast<Input*>(glfwGetWindowUserPointer(window));
+    input->mouse_dx = x - input->mouse_x;
+    input->mouse_dy = y - input->mouse_y;
+    input->mouse_x = x;
+    input->mouse_y = y;
+}
 
-  if (raw->header.dwType == RIM_TYPEMOUSE) {
-    if (raw->data.mouse.usFlags == MOUSE_MOVE_RELATIVE) {
-      mouse_ddx += raw->data.mouse.lLastX;
-      mouse_ddy += raw->data.mouse.lLastY;
-    }
-    if (raw->data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_DOWN) {
-      mouse_button[0] = true;
-      mouse_button_press[0] = true;
-    }
-    if (raw->data.mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_DOWN) {
-      mouse_button[1] = true;
-      mouse_button_press[1] = true;
-    }
-    if (raw->data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_DOWN) {
-      mouse_button[2] = true;
-      mouse_button_press[2] = true;
-    }
-    if (raw->data.mouse.usButtonFlags & RI_MOUSE_LEFT_BUTTON_UP) mouse_button[0] = false;
-    if (raw->data.mouse.usButtonFlags & RI_MOUSE_MIDDLE_BUTTON_UP) mouse_button[1] = false;
-    if (raw->data.mouse.usButtonFlags & RI_MOUSE_RIGHT_BUTTON_UP) mouse_button[2] = false;
-  } else if (raw->header.dwType == RIM_TYPEHID) {
-    //TODO:
-  }
+Input::Input()
+{
+    memset(this, 0, sizeof(Input));
+}
+
+void Input::SetupCallbacks(GLFWwindow* window)
+{
+    glfwSetWindowUserPointer(window, this);
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+
+    glfwSetKeyCallback(window, KeyCallback);
+    glfwSetMouseButtonCallback(window, ButtonCallback);
+    glfwSetCursorPosCallback(window, CursorCallback);
+}
+
+void Input::EndFrame()
+{
+    memset(key_press, 0, sizeof(key_press));
+    memset(mouse_button_press, 0, sizeof(mouse_button_press));
+    mouse_dx = 0.0;
+    mouse_dy = 0.0;
+}
+
+void Input::Update()
+{
+    glfwPollEvents();
 }
