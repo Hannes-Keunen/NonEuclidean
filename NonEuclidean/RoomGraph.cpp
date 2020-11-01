@@ -109,7 +109,7 @@ void create_ve_from_graph2(const RoomGraph2& graph, PObjectVec& objs, PPortalVec
     printf("==new ve==\n");
     printf("Rooms:\n");
     std::vector<std::shared_ptr<Room>> rooms;
-    float room_x = 0.0f;
+    float                              room_x = 0.0f;
     for (int i = 0; i < MaxRooms && graph.rooms[i].type != 0; i++)
     {
         const auto& room_info = graph.rooms[i];

@@ -6,7 +6,10 @@
 class GraphScene : public Scene
 {
 public:
-    GraphScene(const RoomGraph& _graph) : graph(_graph) {}
+    GraphScene(const RoomGraph& _graph)
+        : graph(_graph)
+    {
+    }
 
     virtual void Load(PObjectVec& objs, PPortalVec& portals, Player& player)
     {
@@ -20,7 +23,10 @@ private:
 class GraphScene2 : public Scene
 {
 public:
-    GraphScene2(const RoomGraph2& _graph) : graph(_graph) {}
+    GraphScene2(const RoomGraph2& _graph)
+        : graph(_graph)
+    {
+    }
 
     virtual void Load(PObjectVec& objs, PPortalVec& portals, Player& player)
     {

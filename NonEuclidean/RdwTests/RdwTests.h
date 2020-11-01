@@ -7,11 +7,11 @@
 class GraphTests
 {
 public:
-    static RoomGraph test1();
-    static RoomGraph test2();
-    static RoomGraph test3();
+    static RoomGraph  test1();
+    static RoomGraph  test2();
+    static RoomGraph  test3();
     static RoomGraph2 test4();
-    static RoomGraph test5();
+    static RoomGraph  test5();
 };
 
 class RdwTest2 : public Scene
