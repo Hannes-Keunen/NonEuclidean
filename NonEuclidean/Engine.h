@@ -57,7 +57,6 @@ private:
 
     GLint occlusionCullingSupported;
 
-    // std::vector<std::shared_ptr<Scene>> vScenes;
-    std::vector<RoomGraph> vEnvs;
-    // std::shared_ptr<Scene>              curScene;
+    std::vector<std::shared_ptr<Scene>> vScenes;
+    std::shared_ptr<Scene>              curScene;
 };

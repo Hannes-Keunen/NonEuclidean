@@ -1,4 +1,5 @@
 #include "Engine.h"
+#include "GraphScene.h"
 #include "Level1.h"
 #include "Level2.h"
 #include "Level3.h"
@@ -43,11 +44,11 @@ Engine::Engine()
     // vScenes.push_back(std::shared_ptr<Scene>(new Level5));
     // vScenes.push_back(std::shared_ptr<Scene>(new Level6));
 
-    vEnvs.push_back(GraphTests::test1());
-    vEnvs.push_back(GraphTests::test2());
-    vEnvs.push_back(GraphTests::test3());
-    vEnvs.push_back(GraphTests::test4());
-    vEnvs.push_back(GraphTests::test5());
+    vScenes.push_back(std::shared_ptr<Scene>(new GraphScene(GraphTests::test1())));
+    vScenes.push_back(std::shared_ptr<Scene>(new GraphScene(GraphTests::test2())));
+    vScenes.push_back(std::shared_ptr<Scene>(new GraphScene(GraphTests::test3())));
+    vScenes.push_back(std::shared_ptr<Scene>(new GraphScene2(GraphTests::test4())));
+    vScenes.push_back(std::shared_ptr<Scene>(new GraphScene(GraphTests::test5())));
 
     LoadScene(0);
 
@@ -130,19 +131,17 @@ int Engine::Run()
 void Engine::LoadScene(int ix)
 {
     // Clear out old scene
-    // if (curScene)
-    // {
-    //     curScene->Unload();
-    // }
+    if (curScene)
+    {
+        curScene->Unload();
+    }
     vObjects.clear();
     vPortals.clear();
     player->Reset();
 
     // Create new scene
-    // curScene = vScenes[ix];
-    // curScene->Load(vObjects, vPortals, *player);
-    auto& graph = vEnvs[ix];
-    create_ve_from_graph(graph, vObjects, vPortals);
+    curScene = vScenes[ix];
+    curScene->Load(vObjects, vPortals, *player);
     player->SetPosition(Vector3(0.0f, GH_PLAYER_HEIGHT, 0.0f));
     vObjects.push_back(player);
 }
