@@ -1,6 +1,8 @@
 #include "RoomGraph.h"
 #include "RdwTests/Room.h"
 
+#include <fstream>
+
 static void place_portal(std::shared_ptr<Room>& room, std::shared_ptr<Portal> portal, float p)
 {
     float   w = room->scale.x;
@@ -161,5 +163,23 @@ void create_ve_from_graph2(const RoomGraph2& graph, PObjectVec& objs, PPortalVec
                 portals.push_back(p2);
             }
         }
+    }
+}
+
+void write_to_csv(const char* filename, const RoomGraph2& graph)
+{
+    std::ofstream out(filename);
+
+    for (int i = 0; i < MaxRooms; i++)
+    {
+        const auto& room = graph.rooms[i];
+        out << room.type << ";" << room.w << ";" << room.h << ";";
+
+        for (int j = 0; j < MaxRooms; j++)
+        {
+            out << room.adjacency[j] << ";";
+        }
+
+        out << "\n";
     }
 }

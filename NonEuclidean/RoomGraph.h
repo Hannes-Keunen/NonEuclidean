@@ -34,3 +34,4 @@ struct RoomGraph2
 
 void create_ve_from_graph(const RoomGraph& graph, PObjectVec& objs, PPortalVec& portals);
 void create_ve_from_graph2(const RoomGraph2& graph, PObjectVec& objs, PPortalVec& portals);
+void write_to_csv(const char* filename, const RoomGraph2& graph);

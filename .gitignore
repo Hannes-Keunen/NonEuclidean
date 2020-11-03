@@ -9,3 +9,4 @@ Thumbs.db
 glew-2.1.0
 build
 .vscode
+exported/*

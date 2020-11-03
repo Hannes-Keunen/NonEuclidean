@@ -50,6 +50,8 @@ Engine::Engine()
     vScenes.push_back(std::shared_ptr<Scene>(new GraphScene2(GraphTests::test4())));
     vScenes.push_back(std::shared_ptr<Scene>(new GraphScene(GraphTests::test5())));
 
+    write_to_csv("exported/room_0.csv", GraphTests::test4());
+
     LoadScene(0);
 
     sky.reset(new Sky);
