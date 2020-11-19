@@ -8,7 +8,7 @@ static const char GH_CLASS[] = "NED";
 
 // General
 static const float GH_PI = 3.141592653589793f;
-static const int   GH_MAX_PORTALS = 16;
+static const int   GH_MAX_PORTALS = 40;
 
 // Graphics
 static const bool  GH_START_FULLSCREEN = false;

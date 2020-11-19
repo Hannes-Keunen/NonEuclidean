@@ -58,28 +58,19 @@ RoomGraph GraphTests::test2()
  * second to first as there is only one corridor segment.
  * Overlap is detected because both rooms can be visible at the same time.
  */
-RoomGraph GraphTests::test3()
+RoomGraph2 GraphTests::test3()
 {
     // clang-format off
-    return RoomGraph
+    return RoomGraph2
     {
         .rooms =
         {
-            {.type = 0, .w = 8.0f, .h = 8.0f, .portals = { 9.0f,  7.0f}}, // #0
-            {.type = 0, .w = 2.0f, .h = 2.0f, .portals = { 7.0f,  3.0f}}, // #1
-            {.type = 0, .w = 2.0f, .h = 8.0f, .portals = {19.0f, 13.0f}}, // #2
-            {.type = 0, .w = 7.0f, .h = 2.0f, .portals = { 8.0f, 17.0f}}, // #3
-            {.type = 0, .w = 8.0f, .h = 9.0f, .portals = {16.0f,  9.0f}}, // #4
-            {.type = 0, .w = 5.0f, .h = 2.0f, .portals = { 8.0f, 13.0f}}, // #5
-        },
-        .adjacency =
-        {
-            {false, true , false, false, false, true },
-            {false, false, true , false, false, false},
-            {false, false, false, true , false, false},
-            {false, false, false, false, true , false},
-            {false, false, false, false, false, true },
-            {false, false, false, false, false, false},
+            {.type = 1, .w = 8.0f, .h = 8.0f, .adjacency = {0.0f,  9.0f,  0.0f,  0.0f,  0.0f, 7.0f}}, // #0
+            {.type = 1, .w = 2.0f, .h = 2.0f, .adjacency = {7.0f,  0.0f,  3.0f,  0.0f,  0.0f, 0.0f}}, // #1
+            {.type = 1, .w = 2.0f, .h = 8.0f, .adjacency = {0.0f, 19.0f,  0.0f, 13.0f,  0.0f, 0.0f}}, // #2
+            {.type = 1, .w = 7.0f, .h = 2.0f, .adjacency = {0.0f,  0.0f,  8.0f,  0.0f, 17.0f, 0.0f}}, // #3
+            {.type = 1, .w = 8.0f, .h = 9.0f, .adjacency = {0.0f,  0.0f,  0.0f, 16.0f,  0.0f, 9.0f}}, // #4
+            {.type = 1, .w = 5.0f, .h = 2.0f, .adjacency = {8.0f,  0.0f,  0.0f,  0.0f, 13.0f, 0.0f}}, // #5
         }
     };
     // clang-format on
@@ -140,6 +131,40 @@ RoomGraph GraphTests::test5()
             {false, false, false, false, false,     false, false, true }, // #5
             {false, false, false, false, false,     false, false, true }, // #6
             {false, false, false, false, false,     false, false, false}, // #7
+        }
+    };
+    // clang-format on
+}
+
+/**
+ * Large environment consisting of two smaller parts which don't overlap with
+ * themselves, but do overlap with each other.
+ */
+RoomGraph2 GraphTests::test6()
+{
+    // clang-format off
+    return RoomGraph2
+    {
+        .rooms =
+        {
+            {.type = 1, .w = 4, .h = 4, .adjacency = { 0.0f,  6.0f,  0.0f,  0.0f,  0.0f,    0.0f,  0.0f, 0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,   0.0f, 0.0f,  0.0f}},
+            {.type = 1, .w = 8, .h = 8, .adjacency = {26.0f,  0.0f, 30.0f,  0.0f, 22.0f,    0.0f,  0.0f, 0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,   0.0f, 0.0f,  0.0f}},
+            {.type = 1, .w = 8, .h = 8, .adjacency = { 0.0f, 14.0f,  0.0f, 22.0f,  0.0f,    0.0f,  0.0f, 0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,   0.0f, 0.0f,  0.0f}},
+            {.type = 1, .w = 8, .h = 8, .adjacency = { 0.0f,  0.0f,  6.0f,  0.0f, 14.0f,    0.0f,  0.0f, 0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,   0.0f, 0.0f,  0.0f}},
+            {.type = 1, .w = 8, .h = 8, .adjacency = { 0.0f,  6.0f,  0.0f, 30.0f,  0.0f,   14.0f,  0.0f, 0.0f,  0.0f,  0.0f,  0.0f, 26.0f,  0.0f,   0.0f, 0.0f,  0.0f}},
+
+            {.type = 1, .w = 3, .h = 2, .adjacency = { 0.0f,  0.0f,  0.0f,  0.0f,  9.0f,    0.0f,  2.0f, 0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,   0.0f, 0.0f,  0.0f}},
+            {.type = 1, .w = 2, .h = 9, .adjacency = { 0.0f,  0.0f,  0.0f,  0.0f,  0.0f,   12.0f,  0.0f, 1.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,   0.0f, 0.0f,  0.0f}},
+            {.type = 1, .w = 8, .h = 8, .adjacency = { 0.0f,  0.0f,  0.0f,  0.0f,  0.0f,    0.0f, 18.0f, 0.0f, 30.0f,  0.0f,  0.0f,  0.0f, 26.0f,   0.0f, 0.0f,  0.0f}},
+            {.type = 1, .w = 4, .h = 2, .adjacency = { 0.0f,  0.0f,  0.0f,  0.0f,  0.0f,    0.0f,  0.0f, 5.0f,  0.0f, 11.0f,  0.0f,  0.0f,  0.0f,   0.0f, 0.0f,  0.0f}},
+            {.type = 1, .w = 8, .h = 8, .adjacency = { 0.0f,  0.0f,  0.0f,  0.0f,  0.0f,    0.0f,  0.0f, 0.0f, 10.0f,  0.0f, 22.0f,  0.0f,  0.0f,   0.0f, 0.0f,  0.0f}},
+            {.type = 1, .w = 2, .h = 9, .adjacency = { 0.0f,  0.0f,  0.0f,  0.0f,  0.0f,    0.0f,  0.0f, 0.0f,  0.0f,  1.0f,  0.0f, 12.0f,  0.0f,   0.0f, 0.0f,  6.0f}},
+            {.type = 1, .w = 7, .h = 2, .adjacency = { 0.0f,  0.0f,  0.0f,  0.0f,  8.0f,    0.0f,  0.0f, 0.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,   0.0f, 0.0f,  0.0f}},
+            {.type = 1, .w = 3, .h = 2, .adjacency = { 0.0f,  0.0f,  0.0f,  0.0f,  0.0f,    0.0f,  0.0f, 4.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,   9.0f, 0.0f,  0.0f}},
+
+            {.type = 1, .w = 2, .h = 3, .adjacency = { 0.0f,  0.0f,  0.0f,  0.0f,  0.0f,    0.0f,  0.0f, 0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  3.0f,   0.0f, 6.0f,  0.0f}},
+            {.type = 1, .w = 8, .h = 8, .adjacency = { 0.0f,  0.0f,  0.0f,  0.0f,  0.0f,    0.0f,  0.0f, 0.0f,  0.0f,  0.0f,  0.0f,  0.0f,  0.0f,   4.0f, 0.0f, 28.0f}},
+            {.type = 1, .w = 5, .h = 2, .adjacency = { 0.0f,  0.0f,  0.0f,  0.0f,  0.0f,    0.0f,  0.0f, 0.0f,  0.0f,  0.0f, 13.0f,  0.0f,  0.0f,   0.0f, 6.0f,  0.0f}},
         }
     };
     // clang-format on

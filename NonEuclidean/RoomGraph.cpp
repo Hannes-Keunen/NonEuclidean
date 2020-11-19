@@ -173,11 +173,16 @@ void write_to_csv(const char* filename, const RoomGraph2& graph)
     for (int i = 0; i < MaxRooms; i++)
     {
         const auto& room = graph.rooms[i];
-        out << room.type << ";" << room.w << ";" << room.h << ";";
+        out << room.type << "," << room.w << "," << room.h << ",";
 
         for (int j = 0; j < MaxRooms; j++)
         {
-            out << room.adjacency[j] << ";";
+            out << room.adjacency[j];
+
+            if (j != MaxRooms - 1)
+            {
+                out << ",";
+            }
         }
 
         out << "\n";

@@ -46,11 +46,14 @@ Engine::Engine()
 
     vScenes.push_back(std::shared_ptr<Scene>(new GraphScene(GraphTests::test1())));
     vScenes.push_back(std::shared_ptr<Scene>(new GraphScene(GraphTests::test2())));
-    vScenes.push_back(std::shared_ptr<Scene>(new GraphScene(GraphTests::test3())));
+    vScenes.push_back(std::shared_ptr<Scene>(new GraphScene2(GraphTests::test3())));
     vScenes.push_back(std::shared_ptr<Scene>(new GraphScene2(GraphTests::test4())));
     vScenes.push_back(std::shared_ptr<Scene>(new GraphScene(GraphTests::test5())));
+    vScenes.push_back(std::shared_ptr<Scene>(new GraphScene2(GraphTests::test6())));
 
-    write_to_csv("exported/room_0.csv", GraphTests::test4());
+    write_to_csv("exported/env_0.csv", GraphTests::test4());
+    write_to_csv("exported/env_1.csv", GraphTests::test6());
+    write_to_csv("exported/env_2.csv", GraphTests::test3());
 
     LoadScene(0);
 
