@@ -10,3 +10,5 @@ target_include_directories(NonEuclidean PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/NonE
 find_package(glfw3 REQUIRED)
 target_link_libraries(NonEuclidean glfw ${GLFW_LIBRARIES} glad)
 include_directories(NonEuclidean ${GLFW_INCLUDE_DIRS})
+
+target_link_libraries(NonEuclidean nlohmann_json::nlohmann_json)
