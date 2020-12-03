@@ -20,10 +20,7 @@ Shader::Shader(const char* name)
     glAttachShader(progId, fragId);
 
     // Bind variables
-    for (size_t i = 0; i < attribs.size(); ++i)
-    {
-        glBindAttribLocation(progId, (GLuint) i, attribs[i].c_str());
-    }
+    for (size_t i = 0; i < attribs.size(); ++i) { glBindAttribLocation(progId, (GLuint) i, attribs[i].c_str()); }
 
     // Link the program
     glLinkProgram(progId);
@@ -47,6 +44,9 @@ Shader::Shader(const char* name)
         return;
     }
 
+    glDetachShader(progId, vertId);
+    glDetachShader(progId, fragId);
+
     // Get global variable locations
     mvpId = glGetUniformLocation(progId, "mvp");
     mvId = glGetUniformLocation(progId, "mv");
@@ -54,8 +54,6 @@ Shader::Shader(const char* name)
 
 Shader::~Shader()
 {
-    glDetachShader(progId, vertId);
-    glDetachShader(progId, fragId);
     glDeleteProgram(progId);
     glDeleteShader(vertId);
     glDeleteShader(fragId);
@@ -69,11 +67,11 @@ void Shader::Use()
 GLuint Shader::LoadShader(const char* fname, GLenum type)
 {
     // Read shader source from disk
-    std::ifstream     fin(fname);
+    std::ifstream fin(fname);
     std::stringstream buff;
     buff << fin.rdbuf();
     const std::string str = buff.str();
-    const char*       source = str.c_str();
+    const char* source = str.c_str();
 
     // Create and compile shader
     const GLuint id = glCreateShader(type);

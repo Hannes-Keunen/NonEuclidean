@@ -23,7 +23,7 @@ class Engine
     friend class Input;
 
 public:
-    Engine();
+    Engine(const char* filename);
     ~Engine();
 
     int  Run();

@@ -1,5 +1,6 @@
 #include "RoomGraph.h"
 #include "RdwTests/Room.h"
+#include "Scene.h"
 
 #include <fstream>
 

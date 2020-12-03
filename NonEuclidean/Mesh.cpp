@@ -17,7 +17,7 @@ Mesh::Mesh(const char* fname)
     // Temporaries
     std::vector<float> vert_palette;
     std::vector<float> uv_palette;
-    bool               is3DTex = false;
+    bool is3DTex = false;
 
     // Read the file
     std::string line;
@@ -27,7 +27,7 @@ Mesh::Mesh(const char* fname)
         if (line.find("v ") == 0)
         {
             std::stringstream ss(line.c_str() + 2);
-            float             x, y, z;
+            float x, y, z;
             ss >> x >> y >> z;
             vert_palette.push_back(x);
             vert_palette.push_back(y);
@@ -36,7 +36,7 @@ Mesh::Mesh(const char* fname)
         else if (line.find("vt ") == 0)
         {
             std::stringstream ss(line.c_str() + 3);
-            float             u, v, w;
+            float u, v, w;
             ss >> u >> v >> w;
             uv_palette.push_back(u);
             uv_palette.push_back(v);
@@ -69,9 +69,9 @@ Mesh::Mesh(const char* fname)
         else if (line.find("f ") == 0)
         {
             // Count the slashes
-            int    num_slashes = 0;
+            int num_slashes = 0;
             size_t last_slash_ix = 0;
-            bool   doubleslash = false;
+            bool doubleslash = false;
             for (size_t i = 0; i < line.size(); ++i)
             {
                 if (line[i] == '/')
@@ -86,13 +86,13 @@ Mesh::Mesh(const char* fname)
                     num_slashes++;
                 }
             }
-            uint32_t          a = 0, b = 0, c = 0, d = 0;
-            uint32_t          at = 0, bt = 0, ct = 0, dt = 0;
-            uint32_t          _tmp;
+            uint32_t a = 0, b = 0, c = 0, d = 0;
+            uint32_t at = 0, bt = 0, ct = 0, dt = 0;
+            uint32_t _tmp;
             std::stringstream ss(line.c_str() + 2);
-            const bool        wild = (line[2] == '*');
-            const bool        wild2 = (line[3] == '*');
-            bool              isQuad = false;
+            const bool wild = (line[2] == '*');
+            const bool wild2 = (line[3] == '*');
+            bool isQuad = false;
 
             // Interpret face based on slash
             if (wild)
@@ -188,29 +188,20 @@ Mesh::Mesh(const char* fname)
         }
     }
 
-    // Setup GL
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    SetupGL(is3DTex);
+}
 
-    glGenBuffers(NUM_VBOS, vbo);
-    {
-        glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-        glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(verts[0]), verts.data(), GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    }
-    {
-        glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-        glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(uvs[0]), uvs.data(), GL_STATIC_DRAW);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, (is3DTex ? 3 : 2), GL_FLOAT, GL_FALSE, 0, 0);
-    }
-    {
-        glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
-        glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(normals[0]), normals.data(), GL_STATIC_DRAW);
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    }
+Mesh::Mesh(
+    const std::vector<float>& verts,
+    const std::vector<float>& uvs,
+    const std::vector<float>& normals,
+    const std::vector<Collider>& colliders)
+    : verts(verts)
+    , uvs(uvs)
+    , normals(normals)
+    , colliders(colliders)
+{
+    SetupGL(false);
 }
 
 Mesh::~Mesh()
@@ -222,27 +213,24 @@ Mesh::~Mesh()
 void Mesh::Draw()
 {
     glBindVertexArray(vao);
-    glDrawArrays(GL_TRIANGLES, 0, (GLsizei) verts.size());
+    glDrawArrays(GL_TRIANGLES, 0, (GLsizei) verts.size() / 3);
 }
 
 void Mesh::DebugDraw(const Camera& cam, const Matrix4& objMat)
 {
-    for (size_t i = 0; i < colliders.size(); ++i)
-    {
-        colliders[i].DebugDraw(cam, objMat);
-    }
+    for (size_t i = 0; i < colliders.size(); ++i) { colliders[i].DebugDraw(cam, objMat); }
 }
 
 void Mesh::AddFace(
     const std::vector<float>& vert_palette,
     const std::vector<float>& uv_palette,
-    uint32_t                  a,
-    uint32_t                  at,
-    uint32_t                  b,
-    uint32_t                  bt,
-    uint32_t                  c,
-    uint32_t                  ct,
-    bool                      is3DTex)
+    uint32_t a,
+    uint32_t at,
+    uint32_t b,
+    uint32_t bt,
+    uint32_t c,
+    uint32_t ct,
+    bool is3DTex)
 {
     // Merge texture and vertex indicies
     assert(a > 0 && b > 0 && c > 0);
@@ -294,5 +282,31 @@ void Mesh::AddFace(
         normals.push_back(normal.x);
         normals.push_back(normal.y);
         normals.push_back(normal.z);
+    }
+}
+
+void Mesh::SetupGL(bool is3DTex)
+{
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    glGenBuffers(NUM_VBOS, vbo);
+    {
+        glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+        glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(verts[0]), verts.data(), GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    }
+    {
+        glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+        glBufferData(GL_ARRAY_BUFFER, uvs.size() * sizeof(uvs[0]), uvs.data(), GL_STATIC_DRAW);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, (is3DTex ? 3 : 2), GL_FLOAT, GL_FALSE, 0, 0);
+    }
+    {
+        glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+        glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(normals[0]), normals.data(), GL_STATIC_DRAW);
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
     }
 }

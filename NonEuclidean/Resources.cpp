@@ -4,7 +4,7 @@
 std::shared_ptr<Mesh> AquireMesh(const char* name)
 {
     static std::unordered_map<std::string, std::weak_ptr<Mesh>> map;
-    std::weak_ptr<Mesh>&                                        mesh = map[std::string(name)];
+    std::weak_ptr<Mesh>& mesh = map[std::string(name)];
     if (mesh.expired())
     {
         std::shared_ptr<Mesh> newMesh(new Mesh(name));
@@ -20,7 +20,7 @@ std::shared_ptr<Mesh> AquireMesh(const char* name)
 std::shared_ptr<Shader> AquireShader(const char* name)
 {
     static std::unordered_map<std::string, std::weak_ptr<Shader>> map;
-    std::weak_ptr<Shader>&                                        shader = map[std::string(name)];
+    std::weak_ptr<Shader>& shader = map[std::string(name)];
     if (shader.expired())
     {
         std::shared_ptr<Shader> newShader(new Shader(name));
@@ -36,7 +36,7 @@ std::shared_ptr<Shader> AquireShader(const char* name)
 std::shared_ptr<Texture> AquireTexture(const char* name, int rows, int cols)
 {
     static std::unordered_map<std::string, std::weak_ptr<Texture>> map;
-    std::weak_ptr<Texture>&                                        tex = map[std::string(name)];
+    std::weak_ptr<Texture>& tex = map[std::string(name)];
     if (tex.expired())
     {
         std::shared_ptr<Texture> newTex(new Texture(name, rows, cols));

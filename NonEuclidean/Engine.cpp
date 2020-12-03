@@ -1,5 +1,6 @@
 #include "Engine.h"
 #include "GraphScene.h"
+#include "ImportedScene.h"
 #include "Level1.h"
 #include "Level2.h"
 #include "Level3.h"
@@ -13,13 +14,13 @@
 #include <cmath>
 #include <iostream>
 
-Engine*      GH_ENGINE = nullptr;
-Player*      GH_PLAYER = nullptr;
+Engine* GH_ENGINE = nullptr;
+Player* GH_PLAYER = nullptr;
 const Input* GH_INPUT = nullptr;
-int          GH_REC_LEVEL = 0;
-int64_t      GH_FRAME = 0;
+int GH_REC_LEVEL = 0;
+int64_t GH_FRAME = 0;
 
-Engine::Engine()
+Engine::Engine(const char* filename)
 {
     GH_ENGINE = this;
     GH_INPUT = &input;
@@ -44,16 +45,13 @@ Engine::Engine()
     // vScenes.push_back(std::shared_ptr<Scene>(new Level5));
     // vScenes.push_back(std::shared_ptr<Scene>(new Level6));
 
+    vScenes.push_back(std::shared_ptr<Scene>(new ImportedScene(filename)));
     vScenes.push_back(std::shared_ptr<Scene>(new GraphScene(GraphTests::test1())));
     vScenes.push_back(std::shared_ptr<Scene>(new GraphScene(GraphTests::test2())));
     vScenes.push_back(std::shared_ptr<Scene>(new GraphScene2(GraphTests::test3())));
     vScenes.push_back(std::shared_ptr<Scene>(new GraphScene2(GraphTests::test4())));
     vScenes.push_back(std::shared_ptr<Scene>(new GraphScene(GraphTests::test5())));
     vScenes.push_back(std::shared_ptr<Scene>(new GraphScene2(GraphTests::test6())));
-
-    write_to_csv("exported/env_0.csv", GraphTests::test4());
-    write_to_csv("exported/env_1.csv", GraphTests::test6());
-    write_to_csv("exported/env_2.csv", GraphTests::test3());
 
     LoadScene(0);
 
@@ -190,14 +188,14 @@ void Engine::Update()
                 // Brings point from collider's local coordinates to hits's
                 // local coordinates.
                 const Sphere& sphere = physical->hitSpheres[s];
-                Matrix4       worldToUnit = sphere.LocalToUnit() * worldToLocal;
-                Matrix4       localToUnit = worldToUnit * obj.LocalToWorld();
-                Matrix4       unitToWorld = worldToUnit.Inverse();
+                Matrix4 worldToUnit = sphere.LocalToUnit() * worldToLocal;
+                Matrix4 localToUnit = worldToUnit * obj.LocalToWorld();
+                Matrix4 unitToWorld = worldToUnit.Inverse();
 
                 // For each collider
                 for (size_t c = 0; c < obj.mesh->colliders.size(); ++c)
                 {
-                    Vector3         push;
+                    Vector3 push;
                     const Collider& collider = obj.mesh->colliders[c];
                     if (collider.Collide(localToUnit, push))
                     {
@@ -256,10 +254,7 @@ void Engine::Render(const Camera& cam, GLuint curFBO, const Portal* skipPortal)
     }
 
     // Draw scene
-    for (size_t i = 0; i < vObjects.size(); ++i)
-    {
-        vObjects[i]->Draw(cam, curFBO);
-    }
+    for (size_t i = 0; i < vObjects.size(); ++i) { vObjects[i]->Draw(cam, curFBO); }
 
     // Draw portals if possible
     if (GH_REC_LEVEL > 0)
@@ -369,10 +364,7 @@ void Engine::DestroyGLObjects()
 float Engine::NearestPortalDist() const
 {
     float dist = FLT_MAX;
-    for (size_t i = 0; i < vPortals.size(); ++i)
-    {
-        dist = GH_MIN(dist, vPortals[i]->DistTo(player->pos));
-    }
+    for (size_t i = 0; i < vPortals.size(); ++i) { dist = GH_MIN(dist, vPortals[i]->DistTo(player->pos)); }
     return dist;
 }
 

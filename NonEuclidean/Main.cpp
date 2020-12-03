@@ -2,7 +2,16 @@
 
 int main(int argc, char* argv[])
 {
-    // Run the main engine
-    Engine engine;
-    return engine.Run();
+    if (argc < 2)
+    {
+        std::cout << "Usage: NonEuclidean [env]"
+                  << "where env is a json file containing a virtual env" << std::endl;
+        return 1;
+    }
+    else
+    {
+        // Run the main engine
+        Engine engine(argv[1]);
+        return engine.Run();
+    }
 }
