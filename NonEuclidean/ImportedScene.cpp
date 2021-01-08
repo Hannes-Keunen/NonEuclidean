@@ -30,114 +30,197 @@ struct RoomType
     std::vector<PortalPos> portal_positions;
 };
 
-auto create_corridor_mesh(const std::vector<Vector3>& points) -> std::shared_ptr<Mesh>
+auto create_corridor_mesh(const Vector3& entrance, const Vector3& exit, const std::vector<Vector3>& points)
+    -> std::shared_ptr<Mesh>
 {
     std::vector<float> verts;
     std::vector<float> uvs;
     std::vector<float> normals;
     std::vector<Collider> colliders;
 
-    auto vertex = [&](const Vector3& vert) {
+    auto vertex = [&](const Vector3& vert, const Vector3& uv, const Vector3& normal) {
         verts.push_back(vert.x);
         verts.push_back(vert.y);
         verts.push_back(vert.z);
-    };
 
-    auto uv = [&](const Vector3& uv) {
         uvs.push_back(uv.x);
         uvs.push_back(uv.y);
-    };
 
-    auto normal = [&](const Vector3& normal) {
         normals.push_back(normal.x);
         normals.push_back(normal.y);
         normals.push_back(normal.z);
     };
 
-    auto quad = [&](const Vector3& center, const Vector3& min, const Vector3& max, const Vector3& norm) {
-        Vector3 v1 = center + Vector3(min.x, min.y, max.z); // front left
-        Vector3 v2 = center + Vector3(min.x, min.y, min.z); // back left
-        Vector3 v3 = center + Vector3(max.x, min.y, min.z); // back right
-        Vector3 v4 = center + Vector3(max.x, min.y, max.z); // front right
-
-        float w = abs(min.x - max.x);
-        float d = abs(min.z - max.z);
-        Vector3 vt1 = Vector3(0, d / 8, 0);     // front left
-        Vector3 vt2 = Vector3(0, 0, 0);         // back left
-        Vector3 vt3 = Vector3(w / 8, 0, 0);     // back right
-        Vector3 vt4 = Vector3(w / 8, d / 8, 0); // front right
-
-        // CCW vertex order!
-
-        vertex(v1);
-        uv(vt1);
-        normal(norm);
-
-        vertex(v3);
-        uv(vt3);
-        normal(norm);
-
-        vertex(v2);
-        uv(vt2);
-        normal(norm);
-
-        colliders.emplace_back(v1, v3, v2);
-
-        vertex(v1);
-        uv(vt1);
-        normal(norm);
-
-        vertex(v4);
-        uv(vt4);
-        normal(norm);
-
-        vertex(v3);
-        uv(vt3);
-        normal(norm);
-
-        colliders.emplace_back(v1, v4, v3);
+    enum Faces
+    {
+        Left = 0x01,
+        Right = 0x02,
+        Front = 0x04,
+        Back = 0x08,
     };
+
+    auto segment = [&](const Vector3& center, const Vector3& scale, uint8_t exclude) {
+        Vector3 v_blb(center.x - scale.x / 2, center.y, center.z - scale.z / 2);           // bottom left back
+        Vector3 v_brb(center.x + scale.x / 2, center.y, center.z - scale.z / 2);           // bottom right back
+        Vector3 v_blf(center.x - scale.x / 2, center.y, center.z + scale.z / 2);           // bottom left front
+        Vector3 v_brf(center.x + scale.x / 2, center.y, center.z + scale.z / 2);           // bottom left front
+        Vector3 v_tlb(center.x - scale.x / 2, center.y + scale.y, center.z - scale.z / 2); // top left back
+        Vector3 v_trb(center.x + scale.x / 2, center.y + scale.y, center.z - scale.z / 2); // top right back
+        Vector3 v_tlf(center.x - scale.x / 2, center.y + scale.y, center.z + scale.z / 2); // top left front
+        Vector3 v_trf(center.x + scale.x / 2, center.y + scale.y, center.z + scale.z / 2); // top left front
+
+        Vector3 vt(0, 0, 0);
+
+        // floor
+        vertex(v_blf, vt, Vector3(0, 1, 0));
+        vertex(v_brb, vt, Vector3(0, 1, 0));
+        vertex(v_blb, vt, Vector3(0, 1, 0));
+        colliders.emplace_back(v_blb, v_brb, v_blf);
+        vertex(v_blf, vt, Vector3(0, 1, 0));
+        vertex(v_brf, vt, Vector3(0, 1, 0));
+        vertex(v_brb, vt, Vector3(0, 1, 0));
+        colliders.emplace_back(v_blf, v_brb, v_brf);
+
+        // ceiling
+        vertex(v_tlb, vt, Vector3(0, 1, 0));
+        vertex(v_trb, vt, Vector3(0, 1, 0));
+        vertex(v_tlf, vt, Vector3(0, 1, 0));
+        colliders.emplace_back(v_tlb, v_trb, v_tlf);
+        vertex(v_tlf, vt, Vector3(0, 1, 0));
+        vertex(v_trb, vt, Vector3(0, 1, 0));
+        vertex(v_trf, vt, Vector3(0, 1, 0));
+        colliders.emplace_back(v_tlf, v_trb, v_trf);
+
+        if (!(exclude & Left))
+        {
+            // left
+            vertex(v_blf, vt, Vector3(1, 0, 0));
+            vertex(v_tlb, vt, Vector3(1, 0, 0));
+            vertex(v_tlf, vt, Vector3(1, 0, 0));
+            // colliders.emplace_back(v_blf, v_tlb, v_tlf);
+            vertex(v_blf, vt, Vector3(1, 0, 0));
+            vertex(v_blb, vt, Vector3(1, 0, 0));
+            vertex(v_tlb, vt, Vector3(1, 0, 0));
+            // colliders.emplace_back(v_blf, v_blb, v_tlb);
+        }
+
+        if (!(exclude & Right))
+        {
+            // right
+            vertex(v_brf, vt, Vector3(1, 0, 0));
+            vertex(v_trf, vt, Vector3(1, 0, 0));
+            vertex(v_trb, vt, Vector3(1, 0, 0));
+            // colliders.emplace_back(v_brf, v_trf, v_trb);
+            vertex(v_brf, vt, Vector3(1, 0, 0));
+            vertex(v_trb, vt, Vector3(1, 0, 0));
+            vertex(v_brb, vt, Vector3(1, 0, 0));
+            // colliders.emplace_back(v_brf, v_trb, v_brb);
+        }
+
+        if (!(exclude & Front))
+        {
+            // front
+            vertex(v_blf, vt, Vector3(0, 0, 1));
+            vertex(v_tlf, vt, Vector3(0, 0, 1));
+            vertex(v_trf, vt, Vector3(0, 0, 1));
+            // colliders.emplace_back(v_blf, v_trf, v_tlf);
+            vertex(v_blf, vt, Vector3(0, 0, 1));
+            vertex(v_trf, vt, Vector3(0, 0, 1));
+            vertex(v_brf, vt, Vector3(0, 0, 1));
+            // colliders.emplace_back(v_blf, v_trf, v_brf);
+        }
+
+        if (!(exclude & Back))
+        {
+            // back
+            vertex(v_blb, vt, Vector3(0, 0, 1));
+            vertex(v_trb, vt, Vector3(0, 0, 1));
+            vertex(v_tlb, vt, Vector3(0, 0, 1));
+            // colliders.emplace_back(v_blb, v_trb, v_tlb);
+            vertex(v_blb, vt, Vector3(0, 0, 1));
+            vertex(v_brb, vt, Vector3(0, 0, 1));
+            vertex(v_trb, vt, Vector3(0, 0, 1));
+            // colliders.emplace_back(v_blb, v_tlb, v_brb);
+        }
+    };
+
+    static constexpr const float CorridorWidth = 2.0f;
+    static constexpr const float CorridorHeight = 3.0f;
+
+    Faces in, out;
+    {
+        auto distance = points[0] - entrance;
+        if (distance.x == 0)
+        {
+            in = distance.z < 0 ? Front : Back;
+        }
+        else if (distance.z == 0)
+        {
+            in = distance.x < 0 ? Right : Left;
+        }
+    }
 
     for (int i = 0; i < points.size(); i++)
     {
-        const auto& next = points[i];
+        const auto& current = points[i];
 
+        Vector3 next;
+        if (i < points.size() - 1)
+        {
+            next = points[i + 1];
+        }
+        else
+        {
+            next = exit;
+        }
+
+        Vector3 prev;
         if (i > 0)
         {
-            const auto& prev = points[i - 1];
-            auto center = (prev + next) / 2;
+            prev = points[i - 1];
+            auto center = (prev + current) / 2;
 
-            auto distance = prev - next;
-            float xmin, xmax, zmin, zmax;
-            if (distance.x == 0)
+            auto distance = prev - current;
+            distance.x = abs(distance.x);
+            distance.z = abs(distance.z);
+            if (distance.x == 0 && distance.z > CorridorWidth)
             {
                 // vertical
-                distance.z = abs(distance.z);
-                xmin = -1;
-                xmax = 1;
-                zmin = -(distance.z - 2) / 2;
-                zmax = (distance.z - 2) / 2;
+                float length = distance.z - CorridorWidth;
+                segment(center, Vector3(CorridorWidth, CorridorHeight, length), Front | Back);
             }
-            else
+            else if (distance.z == 0 && distance.x > CorridorWidth)
             {
                 // horizontal
-                distance.x = abs(distance.x);
-                xmin = -(distance.x - 2) / 2;
-                xmax = (distance.x - 2) / 2;
-                zmin = -1;
-                zmax = 1;
-            }
-
-            if ((distance.x == 0 && distance.z > 2) || (distance.z == 0 && distance.x > 2))
-            {
-                // only add a corridor segment if the distance is greater than the width of a corridor
-                quad(center, Vector3(xmin, 0, zmin), Vector3(xmax, 0, zmax), Vector3(0, 1, 0));  // floor
-                quad(center, Vector3(xmax, 3, zmin), Vector3(xmin, 3, zmax), Vector3(0, -1, 0)); // ceiling
+                float length = distance.x - CorridorWidth;
+                segment(center, Vector3(length, CorridorHeight, CorridorWidth), Left | Right);
             }
         }
 
-        quad(points[i], Vector3(-1, 0, -1), Vector3(1, 0, 1), Vector3(0, 1, 0));
-        quad(points[i], Vector3(1, 3, -1), Vector3(-1, 3, 1), Vector3(0, -1, 0));
+        Faces in, out;
+        {
+            auto d_in = current - prev;
+            if (d_in.x == 0)
+            {
+                in = d_in.z < 0 ? Front : Back;
+            }
+            else if (d_in.z == 0)
+            {
+                in = d_in.x < 0 ? Right : Left;
+            }
+
+            auto d_out = next - current;
+            if (d_out.x == 0)
+            {
+                out = d_out.z < 0 ? Back : Front;
+            }
+            else if (d_out.z == 0)
+            {
+                out = d_out.x < 0 ? Left : Right;
+            }
+        }
+
+        segment(points[i], Vector3(2, 3, 2), in | out);
     }
 
     return std::make_shared<Mesh>(verts, uvs, normals, colliders);
@@ -164,7 +247,7 @@ struct Corridor : Object
         this->p1.pos -= avg_point;
         this->p2.pos -= avg_point;
 
-        mesh = create_corridor_mesh(new_points);
+        mesh = create_corridor_mesh(this->p1.pos, this->p2.pos, new_points);
         scale = Vector3(1);
     }
 };
@@ -198,7 +281,7 @@ void ImportedScene::Load(PObjectVec& objs, PPortalVec& portals, Player& player)
     {
         auto& type = room_types[obj["type"]];
 
-        std::shared_ptr<Object> room; // = std::make_shared<Object>();
+        std::shared_ptr<Object> room;
         if (type.is_corridor)
         {
             std::vector<Vector3> points;
@@ -237,8 +320,6 @@ void ImportedScene::Load(PObjectVec& objs, PPortalVec& portals, Player& player)
     {
         int room1_idx = obj["room1"];
         int room2_idx = obj["room2"];
-
-        // printf("Portal: %d -> %d\n", room1_idx, room2_idx);
 
         auto& room1 = rooms[room1_idx];
         auto& room2 = rooms[room2_idx];
@@ -296,8 +377,4 @@ void ImportedScene::Load(PObjectVec& objs, PPortalVec& portals, Player& player)
     }
 
     player.pos = Vector3(0, GH_PLAYER_HEIGHT, 0);
-
-    // auto ground = std::shared_ptr<Object>(new Ground());
-    // ground->scale = Vector3(10, 1, 10);
-    // objs.push_back(ground);
 }
